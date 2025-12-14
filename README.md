@@ -6,6 +6,10 @@ appsettings.json dosyanıza bu alanları doldurmanız gerekir
   "Token": "super-secret-key",
   "Issuer": "MyCompany.AuthService",
   "Audience": "MyCompany.WebApi"
-}
+},
+ "ConnectionStrings": {
+     "UserDatabase": "your_connection_string",
+    
+ }
 
 
