@@ -26,14 +26,14 @@ namespace JwtAuthDotNet9.Controllers
         [HttpPost("login")] 
         public ActionResult<string> Register(UserDto request)
         {
-            string token = CraeteToken(user);
+            
             var passwordVerificationResult=new PasswordHasher<User>().VerifyHashedPassword(user,user.PasswordHash,request.PasswordHash);
             if(passwordVerificationResult==PasswordVerificationResult.Failed)
             {
                 return BadRequest("Wrong password");
             }
-        
-            return Ok("Login successful");
+            string token = CraeteToken(user);
+            return Ok(token);
         }
 
         private string CraeteToken(User user)
