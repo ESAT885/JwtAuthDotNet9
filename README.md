@@ -4,6 +4,10 @@
   <img src="Api.png" width="500" />
  
 </p>
+
+Migration Komutları
+Add-Migration migration_ismi -OutputDir Data/Migrations
+
 ## JWT Configuration
 
 appsettings.json dosyanıza bu alanları doldurmanız gerekir
