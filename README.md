@@ -1,6 +1,9 @@
 #Api denemesi için 
  https://localhost:44386/scalar/v1
-
+<p align="center">
+  <img src="api.png" width="500" />
+ 
+</p>
 ## JWT Configuration
 
 appsettings.json dosyanıza bu alanları doldurmanız gerekir
