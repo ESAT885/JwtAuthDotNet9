@@ -16,23 +16,35 @@ namespace JwtAuthDotNet9.Controllers
     [ApiController]
     public class AuthController(IAuthService authService) : ControllerBase
     {
-        public static User user = new User();
-        [HttpPost("Login")]
-        public async Task<ActionResult<string>> Login(UserDto request)
+
+        [HttpPost("RefreshToken")]
+        public async Task<ActionResult<TokenResponseDto>> RefreshToken(RefreshTokenRequestDto request)
         {
-           var token= await authService.LoginAsync( request);
+            var result = await authService.RefreshTokenAsync(request);
+            if (result is null|| result.AccessToken is null || result.RefreshToken is null)
+                return Unauthorized("Invalid  refresh token");
+            return Ok(result);
+        }   
+     
+        [HttpPost("Login")]
+        public async Task<ActionResult<TokenResponseDto>> Login(UserDto request)
+        {
+            var token = await authService.LoginAsync(request);
+            if (token is null)
+                return BadRequest("Invalid  username or password");
+          
             return Ok(token);
 
         }
-        [HttpPost("Register")] 
-        public async Task<ActionResult<User>> Register(UserDto request)
+        [HttpPost("Register")]
+        public async Task<ActionResult<UserDto>> Register(UserDto request)
         {
-            
-          
-            var user= await authService.RegisterAsync(request );
-            if(user is null)
+
+
+            var user = await authService.RegisterAsync(request);
+            if (user is null)
             {
-            return BadRequest("BadRequest");
+                return BadRequest("BadRequest");
             }
             return Ok(user);
         }
@@ -44,7 +56,7 @@ namespace JwtAuthDotNet9.Controllers
             return Ok(userName);
         }
 
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("AdminOlyEndpoint")]
         public ActionResult<string> AdminOlyEndpoint()
         {
