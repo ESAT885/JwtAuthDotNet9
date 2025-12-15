@@ -1,8 +1,10 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using JwtAuthDotNet9.Entites;
 using JwtAuthDotNet9.Models;
 using JwtAuthDotNet9.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,9 +18,9 @@ namespace JwtAuthDotNet9.Controllers
     {
         public static User user = new User();
         [HttpPost("Login")]
-        public ActionResult<string> Login(UserDto request)
+        public async Task<ActionResult<string>> Login(UserDto request)
         {
-           var token= authService.LoginAsync( request);
+           var token= await authService.LoginAsync( request);
             return Ok(token);
 
         }
@@ -34,7 +36,21 @@ namespace JwtAuthDotNet9.Controllers
             }
             return Ok(user);
         }
+        [Authorize]
+        [HttpGet("AuthenticateOnlyEndpoint")]
+        public ActionResult<string> AuthenticateOnlyEndpoint()
+        {
+            var userName = User?.Identity?.Name;
+            return Ok(userName);
+        }
 
-      
+        [Authorize(Roles ="Admin")]
+        [HttpGet("AdminOlyEndpoint")]
+        public ActionResult<string> AdminOlyEndpoint()
+        {
+            var userName = User?.Identity?.Name;
+            return Ok(userName);
+        }
+
     }
 }
