@@ -1,7 +1,7 @@
 #Api denemesi için 
  https://localhost:44386/scalar/v1
 <p align="center">
-  <img src="api.png" width="500" />
+  <img src="Api.png" width="500" />
  
 </p>
 ## JWT Configuration
