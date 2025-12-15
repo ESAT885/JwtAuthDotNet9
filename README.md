@@ -1,3 +1,6 @@
+#Api denemesi için 
+ https://localhost:44386/scalar/v1
+
 ## JWT Configuration
 
 appsettings.json dosyanıza bu alanları doldurmanız gerekir
