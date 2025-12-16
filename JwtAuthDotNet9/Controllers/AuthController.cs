@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 
 namespace JwtAuthDotNet9.Controllers
@@ -26,8 +27,8 @@ namespace JwtAuthDotNet9.Controllers
             if (result is null|| result.AccessToken is null || result.RefreshToken is null)
                  throw new BusinessException("","Invalid  refresh token"); 
             return Success<TokenResponseDto?>(result);
-        }   
-     
+        }
+        [EnableRateLimiting("login")]
         [HttpPost("Login")]
         public async Task<IActionResult> Login(UserDto request)
         {

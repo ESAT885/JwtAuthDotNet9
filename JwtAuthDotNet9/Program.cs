@@ -1,3 +1,4 @@
+using System.Threading.RateLimiting;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using JwtAuthDotNet9.Data;
@@ -7,9 +8,11 @@ using JwtAuthDotNet9.Services;
 using JwtAuthDotNet9.Validators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +20,32 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: ip,
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 100,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 10,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+            });
+    });
+    options.AddFixedWindowLimiter("login", opt =>
+    {
+        opt.PermitLimit = 5;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 2;
+    });
+});
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -88,10 +116,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             }
         };
     });
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 var app = builder.Build();
 
-//app.UseMiddleware<CorrelationIdMiddleware>();   //
+
 app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
@@ -101,8 +130,10 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseRouting();
+app.UseRateLimiter();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
