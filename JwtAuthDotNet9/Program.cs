@@ -24,6 +24,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
     {
+        var traceId = context.HttpContext.TraceIdentifier;
         var errors = context.ModelState
             .Where(x => x.Value!.Errors.Count > 0)
             .ToDictionary(
@@ -33,7 +34,8 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
         var response = ApiResponse<object>.Fail(
             message: "Validation error",
-            errors: errors
+            errors: errors,
+            traceId: traceId
         );
 
         return new BadRequestObjectResult(response);
@@ -65,21 +67,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             OnChallenge = context =>
             {
                 context.HandleResponse();
-
+                var traceId = context.HttpContext.TraceIdentifier;
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 context.Response.ContentType = "application/json";
 
-                var response = ApiResponse<object>.Fail("Yetkisiz eriþim");
+                var response = ApiResponse<object>.Fail("Yetkisiz eriþim",traceId:traceId);
 
                 return context.Response.WriteAsJsonAsync(response);
             },
 
             OnForbidden = context =>
             {
+                var traceId = context.HttpContext.TraceIdentifier;
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 context.Response.ContentType = "application/json";
 
-                var response = ApiResponse<object>.Fail("Bu iþlem için yetkin yok");
+                var response = ApiResponse<object>.Fail("Bu iþlem için yetkin yok", traceId: traceId);
 
                 return context.Response.WriteAsJsonAsync(response);
             }
@@ -88,7 +91,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddScoped<IAuthService, AuthService>();
 var app = builder.Build();
 
+//app.UseMiddleware<CorrelationIdMiddleware>();   //
 app.UseMiddleware<ExceptionMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

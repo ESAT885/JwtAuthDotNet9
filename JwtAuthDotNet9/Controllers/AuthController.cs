@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using JwtAuthDotNet9.Entites;
 using JwtAuthDotNet9.Exceptions;
 using JwtAuthDotNet9.Models;
+using JwtAuthDotNet9.Models.BaseModels;
 using JwtAuthDotNet9.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -13,63 +14,64 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace JwtAuthDotNet9.Controllers
 {
-    [Route("api/[controller]")]
+    
    
-    public class AuthController(IAuthService authService) : BaseControllerController
+    public class AuthController(IAuthService authService) : BaseController
     {
 
         [HttpPost("RefreshToken")]
-        public async Task<ActionResult<TokenResponseDto>> RefreshToken(RefreshTokenRequestDto request)
+        public async Task<IActionResult> RefreshToken(RefreshTokenRequestDto request)
         {
             var result = await authService.RefreshTokenAsync(request);
             if (result is null|| result.AccessToken is null || result.RefreshToken is null)
-                return Unauthorized("Invalid  refresh token");
-            return Ok(result);
+                 throw new BusinessException("","Invalid  refresh token"); 
+            return Success<TokenResponseDto?>(result);
         }   
      
         [HttpPost("Login")]
-        public async Task<ActionResult<TokenResponseDto>> Login(UserDto request)
+        public async Task<IActionResult> Login(UserDto request)
         {
             var token = await authService.LoginAsync(request);
             if (token is null)
-                return BadRequest("Invalid  username or password");
+                 throw new BusinessException("","Invalid  username or password"); 
           
-            return Ok(token);
+            return Success< TokenResponseDto>(token);
 
         }
         [HttpPost("Register")]
-        public async Task<ActionResult<UserDto>> Register(UserDto request)
+        public async Task<IActionResult> Register(UserDto request)
         {
 
 
             var user = await authService.RegisterAsync(request);
             if (user is null)
             {
-                return BadRequest("BadRequest");
+                throw new BusinessException("", "BadRequest");
+               
             }
-            return Ok(user);
+            return Success(user);
         }
         [Authorize]
         [HttpGet("AuthenticateOnlyEndpoint")]
-        public ActionResult<string> AuthenticateOnlyEndpoint()
+        public IActionResult AuthenticateOnlyEndpoint()
         {
             var userName = User?.Identity?.Name;
-            return Ok(userName);
+            return Success(userName);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpGet("AdminOlyEndpoint")]
-        public ActionResult<string> AdminOlyEndpoint()
+        public IActionResult AdminOlyEndpoint()
         {
             var userName = User?.Identity?.Name;
-            return Ok(userName);
+            return Success<string?>(userName);
         }
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
             if (id == 1)
-                throw new BusinessException("Admin silinemez");
+                throw new BusinessException("", "Admin silinemez");
 
             return Success("Silindi");
         }

@@ -2,12 +2,20 @@
 {
     public abstract class AppException : Exception
     {
-        public int StatusCode { get; }
+        private int status400BadRequest;
 
-        protected AppException(string message, int statusCode)
-            : base(message)
+        public int StatusCode { get; }
+        public string PublicMessage { get; }
+        protected AppException(
+            string publicMessage,
+            string logMessage,
+            int statusCode)
+            : base(logMessage ?? publicMessage)
         {
             StatusCode = statusCode;
+            PublicMessage = publicMessage;
         }
+
+       
     }
 }
