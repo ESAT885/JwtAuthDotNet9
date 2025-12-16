@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
 using JwtAuthDotNet9.Entites;
+using JwtAuthDotNet9.Exceptions;
 using JwtAuthDotNet9.Models;
 using JwtAuthDotNet9.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -13,8 +14,8 @@ using Microsoft.IdentityModel.Tokens;
 namespace JwtAuthDotNet9.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
-    public class AuthController(IAuthService authService) : ControllerBase
+   
+    public class AuthController(IAuthService authService) : BaseControllerController
     {
 
         [HttpPost("RefreshToken")]
@@ -62,6 +63,15 @@ namespace JwtAuthDotNet9.Controllers
         {
             var userName = User?.Identity?.Name;
             return Ok(userName);
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            if (id == 1)
+                throw new BusinessException("Admin silinemez");
+
+            return Success("Silindi");
         }
 
     }
