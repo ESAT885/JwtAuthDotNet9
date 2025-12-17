@@ -40,16 +40,18 @@ VERITABANI
 - SQL Server
 
 APPSETTINGS AYARLARI
-
-"AppSettings": {
-  "Token": "super-secret-key",
-  "Issuer": "MyCompany.AuthService",
-  "Audience": "MyCompany.WebApi"
+```json
+{
+  "AppSettings": {
+    "Token": "YOUR_SECRET_KEY",
+    "Issuer": "MyCompany.AuthService",
+    "Audience": "MyCompany.WebApi"
+  },
+  "ConnectionStrings": {
+    "UserDatabase": "YOUR_CONNECTION_STRING"
+  }
 }
-
-"ConnectionStrings": {
-  "UserDatabase": "your_connection_string"
-}
+```
 
 PROJEYI CALISTIRMA
 dotnet restore
