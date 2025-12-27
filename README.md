@@ -17,8 +17,8 @@ JWT Bearer Authentication kullanilmaktadir.
 Issuer, Audience, Lifetime ve Signing Key dogrulamasi yapilir.
 
 MIGRATION KOMUTLARI
-Add-Migration migration_ismi -OutputDir Data/Migrations
-Update-Database
+- Add-Migration migration_ismi -OutputDir Data/Migrations
+- Update-Database
 
 RATE LIMITING
 Global Limiter:
